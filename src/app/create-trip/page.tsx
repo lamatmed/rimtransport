@@ -20,6 +20,8 @@ export default function CreateTripPage() {
   const [selectedCar, setSelectedCar] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [fetchingCars, setFetchingCars] = useState(true);
+  const [paymentScreenshotFile, setPaymentScreenshotFile] = useState<File | null>(null);
+  const [paymentScreenshotPreview, setPaymentScreenshotPreview] = useState<string | null>(null);
   
   const router = useRouter();
   const { t, locale } = useLanguage();
@@ -53,6 +55,20 @@ export default function CreateTripPage() {
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setPaymentScreenshotFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPaymentScreenshotPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const calculatedFee = price ? (parseFloat(price) * 4 * 0.05).toFixed(2) : "0";
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!departureCity || !arrivalCity || !price || !seats || !selectedCar || !date || !time) {
@@ -60,10 +76,28 @@ export default function CreateTripPage() {
       return;
     }
 
+    if (!paymentScreenshotFile) {
+      alert(t('upload_trip_screenshot'));
+      return;
+    }
+
     setLoading(true);
     try {
       const user = await authService.getCurrentUser();
       const dateTime = new Date(`${date}T${time}`);
+      const feeAmount = (parseFloat(price) * 4) * 0.05;
+
+      let storageId = "";
+      if (paymentScreenshotFile) {
+        const uploadUrl = await authService.generateProfilePhotoUploadUrl();
+        const response = await fetch(uploadUrl, {
+          method: "POST",
+          headers: { "Content-Type": paymentScreenshotFile.type },
+          body: paymentScreenshotFile,
+        });
+        const data = await response.json();
+        storageId = data.storageId;
+      }
       
       await tripService.createTrip({
         driver_id: user?.id,
@@ -73,9 +107,11 @@ export default function CreateTripPage() {
         date: dateTime.getTime(),
         price: parseFloat(price),
         available_seats: parseInt(seats),
+        feeAmount: feeAmount,
+        paymentScreenshotStorageId: storageId,
       });
       
-      alert(t('trip_created_success'));
+      alert(t('trip_pending_approval'));
       router.push("/");
     } catch (e: any) {
       alert(e.message || t('publish_trip_failed'));
@@ -218,6 +254,31 @@ export default function CreateTripPage() {
             </div>
           )}
         </div>
+
+        {price && (
+          <div className="fade-in" style={{ padding: "1.5rem", background: "rgba(0, 169, 92, 0.05)", borderRadius: "20px", border: "1px dashed var(--primary-green)" }}>
+            <h3 style={{ fontSize: "1rem", fontWeight: "700", color: "var(--primary-green)", marginBottom: "0.5rem" }}>{t('trip_payment_title')}</h3>
+            <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: "1rem" }}>{t('trip_payment_desc', { amount: calculatedFee })}</p>
+            
+            <div style={{ background: "white", padding: "0.8rem", borderRadius: "10px", marginBottom: "1.25rem", border: "1px solid var(--border-color)" }}>
+              <p style={{ fontSize: "0.85rem", fontWeight: "600" }}>{t('trip_payment_instructions', { amount: calculatedFee })}</p>
+            </div>
+
+            <label style={{ cursor: "pointer", width: "100%", display: "block" }}>
+              <input type="file" accept="image/*" onChange={handleFileChange} style={{ display: "none" }} />
+              <div style={{ border: "2px dashed var(--border-color)", borderRadius: "12px", padding: "1rem", textAlign: "center", background: paymentScreenshotPreview ? "white" : "transparent" }}>
+                {paymentScreenshotPreview ? (
+                  <img src={paymentScreenshotPreview} style={{ maxWidth: "100%", maxHeight: "150px", borderRadius: "8px" }} alt="Payment Screenshot" />
+                ) : (
+                  <div style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>
+                    <Plus size={24} color="var(--primary-green)" style={{ margin: "0 auto 4px" }} />
+                    <p style={{ fontWeight: "600", color: "var(--primary-green)" }}>{t('upload_trip_screenshot')}</p>
+                  </div>
+                )}
+              </div>
+            </label>
+          </div>
+        )}
 
         <button type="submit" className="btn-primary" disabled={loading || cars.length === 0} style={{ width: "100%", padding: "1.25rem", marginTop: "1rem" }}>
           {loading ? "..." : t('publish_trip')}

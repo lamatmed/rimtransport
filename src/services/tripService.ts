@@ -67,6 +67,8 @@ export const tripService = {
       date: Number(trip.date),
       price: Number(trip.price),
       availableSeats: Number(trip.availableSeats || trip.available_seats),
+      feeAmount: Number(trip.feeAmount),
+      paymentScreenshotStorageId: trip.paymentScreenshotStorageId,
     });
   },
 

@@ -232,7 +232,16 @@ export default function ProfilePage() {
         
         <h1 style={{ fontSize: "1.75rem", fontWeight: "800", marginBottom: "0.5rem" }}>{profile?.name || "..." }</h1>
         <div style={{ display: "inline-flex", alignItems: "center", background: "rgba(255,255,255,0.2)", padding: "4px 12px", borderRadius: "20px", fontSize: "0.75rem", fontWeight: "700", marginBottom: "1rem" }}>
-          {profile?.role === 'driver' ? `🚗 ${t('role_driver').toUpperCase()}` : `👤 ${t('role_passenger').toUpperCase()}`}
+          {profile?.role === 'admin' || profile?.email === 'admin@gmail.mr' ? (
+            <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+              <Shield size={14} color={mauritaniaGold} />
+              {t('admin_title').toUpperCase()}
+            </span>
+          ) : profile?.role === 'driver' ? (
+            `🚗 ${t('role_driver').toUpperCase()}`
+          ) : (
+            `👤 ${t('role_passenger').toUpperCase()}`
+          )}
         </div>
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "8px", fontSize: "0.9rem" }}>
           <Phone size={14} /> <span>{profile?.phone}</span>
@@ -241,44 +250,54 @@ export default function ProfilePage() {
 
       {/* Stats Section */}
       <div style={{ display: "flex", gap: "10px", padding: "0 1.25rem", marginTop: "-2rem", marginBottom: "2rem" }}>
-        <StatCard icon={<Car size={20} color={mauritaniaGold} />} value={String(carsCount)} label={profile?.role === 'driver' ? t('vehicles') : t('available_trips')} />
-        <StatCard icon={<Award size={20} color={mauritaniaGold} />} value={String(activityCount)} label={profile?.role === 'driver' ? t('trips') : t('reservations')} />
+        {profile?.role !== 'admin' && profile?.email !== 'admin@gmail.mr' ? (
+          <>
+            <StatCard icon={<Car size={20} color={mauritaniaGold} />} value={String(carsCount)} label={profile?.role === 'driver' ? t('vehicles') : t('available_trips')} />
+            <StatCard icon={<Award size={20} color={mauritaniaGold} />} value={String(activityCount)} label={profile?.role === 'driver' ? t('trips') : t('reservations')} />
+          </>
+        ) : (
+          <StatCard icon={<Shield size={20} color={mauritaniaGold} />} value="MASTER" label={t('admin_title')} />
+        )}
         <StatCard icon={<Clock size={20} color={mauritaniaGold} />} value={formatMemberDuration(profile?._creationTime)} label={t('member')} />
       </div>
 
       {/* Related Insights */}
-      <div style={{ padding: "0 1.25rem", marginBottom: "2rem" }}>
-        <h3 style={{ fontSize: "1.1rem", fontWeight: "800", marginBottom: "1rem" }}>{profile?.role === 'driver' ? t('passengers_on_trips') : t('drivers_on_trips')}</h3>
-        <div className="card-premium" style={{ padding: "1.25rem" }}>
-           <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "1rem", color: "var(--text-muted)" }}>
-             <Users size={20} color="var(--primary-green)" />
-             <span style={{ fontSize: "0.9rem" }}>{relatedPeople.length} {profile?.role === 'driver' ? t('unique_passengers') : t('unique_drivers')}</span>
-           </div>
-           {relatedPeople.length === 0 ? (
-             <p style={{ textAlign: "center", fontSize: "0.85rem", color: "var(--text-muted)", padding: "1rem" }}>{profile?.role === 'driver' ? t('no_driver_res') : t('no_passenger_res')}</p>
-           ) : (
-             <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-               {relatedPeople.slice(0, 3).map(person => (
-                 <div key={person.id} style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                   <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: "rgba(0,169,92,0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--primary-green)" }}>
-                     <User size={18} />
-                   </div>
-                   <div style={{ flex: 1 }}>
-                     <p style={{ fontWeight: "600", fontSize: "0.9rem" }}>{person.name}</p>
-                     <p style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>{person.phone}</p>
-                   </div>
-                 </div>
-               ))}
+      {/* Related Insights */}
+      {profile?.role !== 'admin' && profile?.email !== 'admin@gmail.mr' && (
+        <div style={{ padding: "0 1.25rem", marginBottom: "2rem" }}>
+          <h3 style={{ fontSize: "1.1rem", fontWeight: "800", marginBottom: "1rem" }}>{profile?.role === 'driver' ? t('passengers_on_trips') : t('drivers_on_trips')}</h3>
+          <div className="card-premium" style={{ padding: "1.25rem" }}>
+             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "1rem", color: "var(--text-muted)" }}>
+               <Users size={20} color="var(--primary-green)" />
+               <span style={{ fontSize: "0.9rem" }}>{relatedPeople.length} {profile?.role === 'driver' ? t('unique_passengers') : t('unique_drivers')}</span>
              </div>
-           )}
+             {relatedPeople.length === 0 ? (
+               <p style={{ textAlign: "center", fontSize: "0.85rem", color: "var(--text-muted)", padding: "1rem" }}>{profile?.role === 'driver' ? t('no_driver_res') : t('no_passenger_res')}</p>
+             ) : (
+               <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                 {relatedPeople.slice(0, 3).map(person => (
+                   <div key={person.id} style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                     <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: "rgba(0,169,92,0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--primary-green)" }}>
+                       <User size={18} />
+                     </div>
+                     <div style={{ flex: 1 }}>
+                       <p style={{ fontWeight: "600", fontSize: "0.9rem" }}>{person.name}</p>
+                       <p style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>{person.phone}</p>
+                     </div>
+                   </div>
+                 ))}
+               </div>
+             )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Options Sections */}
       <div style={{ padding: "0 1.25rem" }}>
         <h3 style={{ fontSize: "1.1rem", fontWeight: "800", marginBottom: "1rem" }}>{t('account')}</h3>
         <div className="card-premium" style={{ overflow: "hidden" }}>
           <ProfileOption icon={<User size={20} color="var(--primary-green)" />} title={t('personal_info')} onClick={() => setShowInfoModal(true)} />
+          {profile?.email === "admin@gmail.mr" && <ProfileOption icon={<Shield size={20} color="var(--primary-green)" />} title={t('admin_title')} onClick={() => router.push('/admin')} />}
           {profile?.role === 'driver' && <ProfileOption icon={<Car size={20} color="var(--primary-green)" />} title={t('my_cars')} onClick={() => router.push('/my-cars')} />}
           <ProfileOption icon={<Settings size={20} color="var(--primary-green)" />} title={t('language')} onClick={handleToggleLanguage} badge={locale.toUpperCase()} />
           <ProfileOption icon={<Lock size={20} color="var(--primary-green)" />} title={t('change_password')} onClick={() => setShowPasswordModal(true)} />

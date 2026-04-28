@@ -24,6 +24,17 @@ export const translations = {
     email_already_registered: 'Cet e-mail est déjà enregistré',
     phone_already_registered: 'Ce numéro de téléphone est déjà enregistré',
     
+    // Auth - Driver Approval
+    driver_subscription_title: 'Abonnement Chauffeur',
+    driver_subscription_desc: 'Pour activer votre compte chauffeur, veuillez payer les frais d\'abonnement de 500 MRU via Bankily ou Masrivi.',
+    payment_instructions: 'Envoyez le paiement au numéro : +222 46 00 00 00. Puis téléchargez une capture d\'écran de la transaction ci-dessous.',
+    upload_payment_screenshot: 'Charger la capture d\'écran du paiement',
+    payment_screenshot_required: 'La capture d\'écran du paiement est obligatoire pour les chauffeurs',
+    pending_approval_title: 'Compte en attente',
+    pending_approval_desc: 'Votre compte est en cours de vérification. Nos administrateurs activent généralement les comptes dans un délai de 24 heures après vérification du paiement.',
+    contact_admin: 'Si vous avez des questions, contactez le support.',
+    go_to_login: 'Retour à la connexion',
+    
     // Auth - Login
     login_title: 'Bon retour',
     login_subtitle: 'Connectez-vous pour continuer',
@@ -146,6 +157,13 @@ export const translations = {
     form_subtitle: 'Remplissez les détails de votre nouveau trajet',
     error: 'Erreur',
     success: 'Succès',
+    trip_payment_title: 'Frais de publication',
+    trip_payment_desc: 'Pour publier ce trajet, vous devez payer une commission de 5% ({{amount}} MRU) sur la base de 4 places.',
+    trip_payment_instructions: 'Payez {{amount}} MRU au numéro +222 46 00 00 00 et téléchargez la capture d\'écran.',
+    upload_trip_screenshot: 'Charger la preuve de paiement du trajet',
+    trip_pending_approval: 'Votre trajet est en attente de vérification par l\'administrateur.',
+    pending_trips: 'Trajets en attente',
+    no_pending_trips: 'Aucun trajet en attente.',
     
     // Trip Details
     trip_details: 'Détails du Trajet',
@@ -264,6 +282,14 @@ export const translations = {
     notifications_title: 'Notifications',
     view_trip: 'Voir le trajet',
     view_reservation: 'Voir la réservation',
+    
+    // Admin
+    admin_title: 'Administration',
+    pending_drivers: 'Chauffeurs en attente',
+    approve: 'Approuver',
+    no_pending_drivers: 'Aucun chauffeur en attente.',
+    payment_screenshot: 'Preuve de paiement',
+    not_authorized: 'Accès non autorisé',
   },
   ar: {
     // Auth - Signup
@@ -287,6 +313,17 @@ export const translations = {
     signup_failed: 'فشل التسجيل',
     email_already_registered: 'هذا البريد الإلكتروني مسجل بالفعل',
     phone_already_registered: 'رقم الهاتف هذا مسجل بالفعل',
+    
+    // Auth - Driver Approval
+    driver_subscription_title: 'اشتراك السائق',
+    driver_subscription_desc: 'لتفعيل حساب السائق الخاص بك، يرجى دفع رسوم الاشتراك البالغة 500 أوقية عبر بنكيلي أو مصرفي.',
+    payment_instructions: 'أرسل الدفع إلى الرقم: +222 46 00 00 00. ثم ارفع لقطة شاشة للمعاملة أدناه.',
+    upload_payment_screenshot: 'رفع لقطة شاشة للدفع',
+    payment_screenshot_required: 'لقطة شاشة للدفع مطلوبة للسائقين',
+    pending_approval_title: 'الحساب قيد الانتظار',
+    pending_approval_desc: 'حسابك قيد المراجعة. يقوم مسؤولونا عادةً بتنشيط الحسابات في غضون 24 ساعة بعد التحقق من الدفع.',
+    contact_admin: 'إذا كان لديك أي أسئلة، اتصل بالدعم.',
+    go_to_login: 'العودة لتسجيل الدخول',
     
     // Auth - Login
     login_title: 'مرحباً بعودتك',
@@ -410,6 +447,13 @@ export const translations = {
     form_subtitle: 'املأ تفاصيل رحلتك الجديدة',
     error: 'خطأ',
     success: 'تم بنجاح',
+    trip_payment_title: 'رسوم النشر',
+    trip_payment_desc: 'لنشر هذه الرحلة، يجب عليك دفع عمولة بنسبة 5٪ ({{amount}} أوقية) على أساس 4 مقاعد.',
+    trip_payment_instructions: 'ادفع {{amount}} أوقية للرقم +222 46 00 00 00 وارفع لقطة الشاشة.',
+    upload_trip_screenshot: 'رفع لقطة شاشة لدفع الرحلة',
+    trip_pending_approval: 'رحلتك قيد انتظار مراجعة المسؤول.',
+    pending_trips: 'رحلات قيد الانتظار',
+    no_pending_trips: 'لا توجد رحلات قيد الانتظار.',
 
     // Trip Details
     trip_details: 'تفاصيل الرحلة',
@@ -529,6 +573,14 @@ export const translations = {
     notifications_title: 'التنبيهات',
     view_trip: 'عرض الرحلة',
     view_reservation: 'عرض الحجز',
+    
+    // Admin
+    admin_title: 'الإدارة',
+    pending_drivers: 'السائقين قيد الانتظار',
+    approve: 'موافقة',
+    no_pending_drivers: 'لا يوجد سائقين قيد الانتظار.',
+    payment_screenshot: 'إثبات الدفع',
+    not_authorized: 'غير مسموح بالدخول',
   }
 };
 

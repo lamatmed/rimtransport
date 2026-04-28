@@ -15,6 +15,8 @@ export default function SignupPage() {
   const [role, setRole] = useState<'passenger' | 'driver'>("passenger");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [paymentFile, setPaymentFile] = useState<File | null>(null);
+  const [paymentPreview, setPaymentPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   
@@ -29,8 +31,27 @@ export default function SignupPage() {
     }
     setLoading(true);
     setError("");
+    if (role === 'driver' && !paymentFile) {
+      setError(t("payment_screenshot_required"));
+      setLoading(false);
+      return;
+    }
+
     try {
-      const { user } = await authService.signUp(email || undefined, password, name, phone, role);
+      let paymentScreenshotStorageId: string | undefined;
+      
+      if (paymentFile) {
+        const uploadUrl = await authService.generateProfilePhotoUploadUrl();
+        const result = await fetch(uploadUrl, {
+          method: "POST",
+          headers: { "Content-Type": paymentFile.type },
+          body: paymentFile,
+        });
+        const data = await result.json();
+        paymentScreenshotStorageId = data.storageId;
+      }
+
+      const { user } = await authService.signUp(email || undefined, password, name, phone, role, paymentScreenshotStorageId);
       
       if (imageFile) {
         try {
@@ -69,6 +90,18 @@ export default function SignupPage() {
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handlePaymentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setPaymentFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPaymentPreview(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
@@ -158,6 +191,29 @@ export default function SignupPage() {
             <input type="password" placeholder={t("password_placeholder")} style={{ width: "100%", background: "transparent", border: "none", outline: "none", fontSize: "1rem" }} value={password} onChange={(e) => setPassword(e.target.value)} />
           </div>
         </div>
+
+        {role === 'driver' && (
+          <div className="fade-in" style={{ marginTop: "1rem", padding: "1.25rem", background: "rgba(0, 169, 92, 0.05)", borderRadius: "16px", border: "1px dashed var(--primary-green)" }}>
+            <h3 style={{ fontSize: "1rem", fontWeight: "700", color: "var(--primary-green)", marginBottom: "0.5rem" }}>{t("driver_subscription_title")}</h3>
+            <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: "1rem" }}>{t("driver_subscription_desc")}</p>
+            <div style={{ background: "white", padding: "0.8rem", borderRadius: "10px", marginBottom: "1rem", border: "1px solid var(--border-color)" }}>
+              <p style={{ fontSize: "0.85rem", fontWeight: "600", color: "var(--foreground)" }}>{t("payment_instructions")}</p>
+            </div>
+            
+            <label style={{ cursor: "pointer", width: "100%", display: "block" }}>
+              <input type="file" accept="image/*" onChange={handlePaymentChange} style={{ display: "none" }} />
+              <div style={{ border: "2px dashed var(--border-color)", borderRadius: "12px", padding: "1.5rem", textAlign: "center", background: paymentPreview ? "white" : "transparent" }}>
+                {paymentPreview ? (
+                  <img src={paymentPreview} style={{ maxWidth: "100%", maxHeight: "200px", borderRadius: "8px" }} alt="Payment Screenshot" />
+                ) : (
+                  <div style={{ color: "var(--text-muted)" }}>
+                    <p style={{ fontWeight: "600", color: "var(--primary-green)" }}>{t("upload_payment_screenshot")}</p>
+                  </div>
+                )}
+              </div>
+            </label>
+          </div>
+        )}
 
         {error && (
           <div style={{ background: "rgba(210, 16, 52, 0.1)", color: "var(--error)", padding: "0.8rem", borderRadius: "10px", fontSize: "0.85rem", textAlign: "center", fontWeight: "600" }}>

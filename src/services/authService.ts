@@ -4,7 +4,7 @@ import { api } from '../../convex/_generated/api';
 const USER_STORAGE_KEY = 'rimtransport_user_id';
 
 export const authService = {
-  async signUp(email: string | undefined, password: string, name: string, phone: string, role: 'driver' | 'passenger') {
+  async signUp(email: string | undefined, password: string, name: string, phone: string, role: 'driver' | 'passenger' | 'admin', paymentScreenshotStorageId?: string) {
     const mockUserId = "user_" + Math.random().toString(36).substring(7);
     
     const convexId = await (convex as any).mutation(api.profiles.createProfile, {
@@ -14,6 +14,7 @@ export const authService = {
       password,
       phone,
       role,
+      paymentScreenshotStorageId,
     });
     
     if (typeof window !== 'undefined') {
@@ -32,7 +33,7 @@ export const authService = {
     if (typeof window !== 'undefined') {
       localStorage.setItem(USER_STORAGE_KEY, user.id);
     }
-    return { user: { id: user.id, phone: user.phone, email: user.email } };
+    return { user: { id: user.id, phone: user.phone, email: user.email, role: user.role, isApproved: user.isApproved } };
   },
 
   async getProfile(id: any) {
@@ -92,7 +93,7 @@ export const authService = {
     try {
       const profile = await this.getProfile(convexId as any);
       if (profile) {
-        return { id: convexId, phone: profile.phone, email: profile.email };
+        return { id: convexId, phone: profile.phone, email: profile.email, role: profile.role, isApproved: profile.isApproved };
       }
       return null;
     } catch (e) {

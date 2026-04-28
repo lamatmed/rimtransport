@@ -8,8 +8,11 @@ export default defineSchema({
     email: v.optional(v.string()),
     password: v.optional(v.string()),
     phone: v.string(),
-    role: v.union(v.literal("driver"), v.literal("passenger")),
+    role: v.union(v.literal("driver"), v.literal("passenger"), v.literal("admin")),
     photoStorageId: v.optional(v.string()),
+    paymentScreenshotStorageId: v.optional(v.string()),
+    isApproved: v.optional(v.boolean()),
+    status: v.optional(v.string()), // "pending", "active", "suspended"
   })
     .index("by_userId", ["userId"])
     .index("by_email", ["email"])
@@ -35,6 +38,9 @@ export default defineSchema({
     date: v.number(), // Timestamp in milliseconds
     price: v.number(),
     availableSeats: v.number(),
+    feeAmount: v.optional(v.number()),
+    paymentScreenshotStorageId: v.optional(v.string()),
+    isApproved: v.optional(v.boolean()), // Default to false for new trips
   }).index("by_driverId", ["driverId"]),
 
   reservations: defineTable({

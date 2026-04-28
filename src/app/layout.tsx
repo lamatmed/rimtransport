@@ -35,6 +35,7 @@ export const viewport: Viewport = {
 import { MobileNav } from "@/components/MobileNav";
 import { Header } from "@/components/Header";
 import { LanguageProvider } from "@/providers/LanguageProvider";
+import { ApprovalGuard } from "@/components/ApprovalGuard";
 
 export default function RootLayout({
   children,
@@ -47,9 +48,11 @@ export default function RootLayout({
         <ConvexClientProvider>
           <LanguageProvider>
             <Header />
-            <main className="container fade-in">
-              {children}
-            </main>
+            <ApprovalGuard>
+              <main className="container fade-in">
+                {children}
+              </main>
+            </ApprovalGuard>
             <MobileNav />
           </LanguageProvider>
         </ConvexClientProvider>

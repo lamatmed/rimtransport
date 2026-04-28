@@ -12,9 +12,12 @@ export const createProfile = mutation({
     email: v.optional(v.string()),
     password: v.string(),
     phone: v.string(),
-    role: v.union(v.literal("driver"), v.literal("passenger")),
+    role: v.union(v.literal("driver"), v.literal("passenger"), v.literal("admin")),
+    paymentScreenshotStorageId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const isApproved = args.role !== "driver";
+    const status = args.role === "driver" ? "pending" : "active";
     const existingPhone = await ctx.db
       .query("profiles")
       .withIndex("by_phone", (q) => q.eq("phone", args.phone))
@@ -42,6 +45,9 @@ export const createProfile = mutation({
       password: args.password,
       phone: args.phone,
       role: args.role,
+      isApproved,
+      status,
+      paymentScreenshotStorageId: args.paymentScreenshotStorageId,
     });
   },
 });
@@ -72,7 +78,10 @@ export const getProfileByUserId = query({
     const photoUrl = profile.photoStorageId
       ? await ctx.storage.getUrl(profile.photoStorageId)
       : null;
-    return { ...profile, id: profile._id, photoUrl };
+    const paymentScreenshotUrl = profile.paymentScreenshotStorageId
+      ? await ctx.storage.getUrl(profile.paymentScreenshotStorageId)
+      : null;
+    return { ...profile, id: profile._id, photoUrl, paymentScreenshotUrl };
   },
 });
 
@@ -84,7 +93,10 @@ export const getProfileById = query({
     const photoUrl = profile.photoStorageId
       ? await ctx.storage.getUrl(profile.photoStorageId)
       : null;
-    return { ...profile, id: profile._id, photoUrl };
+    const paymentScreenshotUrl = profile.paymentScreenshotStorageId
+      ? await ctx.storage.getUrl(profile.paymentScreenshotStorageId)
+      : null;
+    return { ...profile, id: profile._id, photoUrl, paymentScreenshotUrl };
   },
 });
 
@@ -94,7 +106,7 @@ export const updateProfile = mutation({
     name: v.optional(v.string()),
     phone: v.optional(v.string()),
     email: v.optional(v.string()),
-    role: v.optional(v.union(v.literal("driver"), v.literal("passenger"))),
+    role: v.optional(v.union(v.literal("driver"), v.literal("passenger"), v.literal("admin"))),
   },
   handler: async (ctx, args) => {
     const existing = await ctx.db.get(args.id);
@@ -106,7 +118,7 @@ export const updateProfile = mutation({
       name?: string;
       phone?: string;
       email?: string;
-      role?: "driver" | "passenger";
+      role?: "driver" | "passenger" | "admin";
     } = {};
 
     if (typeof args.name === "string") patch.name = args.name;
@@ -158,6 +170,46 @@ export const changePassword = mutation({
       throw new Error("Incorrect current password");
     }
     await ctx.db.patch(args.id, { password: args.newPassword.trim() });
+    return true;
+  },
+});
+
+export const getPendingDrivers = query({
+  args: {},
+  handler: async (ctx) => {
+    const drivers = await ctx.db
+      .query("profiles")
+      .filter((q) => 
+        q.and(
+          q.eq(q.field("role"), "driver"),
+          q.or(
+            q.eq(q.field("isApproved"), false),
+            q.eq(q.field("isApproved"), undefined)
+          )
+        )
+      )
+      .collect();
+
+    const driversWithPhotos = await Promise.all(
+      drivers.map(async (d) => ({
+        ...d,
+        id: d._id,
+        photoUrl: d.photoStorageId ? await ctx.storage.getUrl(d.photoStorageId) : null,
+        paymentScreenshotUrl: d.paymentScreenshotStorageId ? await ctx.storage.getUrl(d.paymentScreenshotStorageId) : null,
+      }))
+    );
+
+    return driversWithPhotos;
+  },
+});
+
+export const approveDriver = mutation({
+  args: { id: v.id("profiles") },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.id, {
+      isApproved: true,
+      status: "active",
+    });
     return true;
   },
 });

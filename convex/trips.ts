@@ -9,7 +9,10 @@ export const listAvailableTrips = query({
   handler: async (ctx, args) => {
     let tripsQuery = ctx.db
       .query("trips")
-      .filter((q) => q.gt(q.field("availableSeats"), 0));
+      .filter((q) => q.and(
+        q.gt(q.field("availableSeats"), 0),
+        q.eq(q.field("isApproved"), true)
+      ));
 
     const trips = await tripsQuery.collect();
 
@@ -75,9 +78,14 @@ export const createTrip = mutation({
     date: v.number(),
     price: v.number(),
     availableSeats: v.number(),
+    feeAmount: v.number(),
+    paymentScreenshotStorageId: v.string(),
   },
   handler: async (ctx, args) => {
-    const tripId = await ctx.db.insert("trips", args);
+    const tripId = await ctx.db.insert("trips", {
+      ...args,
+      isApproved: false,
+    });
     return await ctx.db.get(tripId);
   },
 });
@@ -173,5 +181,46 @@ export const cleanupPastTrips = mutation({
     }
 
     return { deletedTrips: pastTrips.length };
+  },
+});
+
+export const getPendingTrips = query({
+  args: {},
+  handler: async (ctx) => {
+    const trips = await ctx.db
+      .query("trips")
+      .filter((q) => 
+        q.or(
+          q.eq(q.field("isApproved"), false),
+          q.eq(q.field("isApproved"), undefined)
+        )
+      )
+      .collect();
+
+    return await Promise.all(
+      trips.map(async (trip) => {
+        const driver = await ctx.db.get(trip.driverId);
+        const car = await ctx.db.get(trip.carId);
+        const paymentScreenshotUrl = trip.paymentScreenshotStorageId 
+          ? await ctx.storage.getUrl(trip.paymentScreenshotStorageId)
+          : null;
+        
+        return {
+          ...trip,
+          id: trip._id,
+          profiles: driver ? { ...driver, id: driver._id } : null,
+          cars: car ? { ...car, id: car._id } : null,
+          paymentScreenshotUrl,
+        };
+      })
+    );
+  },
+});
+
+export const approveTrip = mutation({
+  args: { id: v.id("trips") },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.id, { isApproved: true });
+    return true;
   },
 });
