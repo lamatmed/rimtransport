@@ -1,4 +1,3 @@
-/* eslint-disable react/no-unescaped-entities */
 export default function PrivacyPage() {
   return (
     <main style={{ maxWidth: 800, margin: "auto", padding: "2rem", fontFamily: "system-ui, -apple-system, sans-serif", lineHeight: "1.6", color: "#333" }}>
