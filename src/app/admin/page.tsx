@@ -117,7 +117,7 @@ export default function AdminPage() {
                 <div style={{ marginBottom: "1.25rem" }}>
                   <p style={{ fontSize: "0.85rem", fontWeight: "600", marginBottom: "0.5rem", display: "flex", alignItems: "center", gap: "4px" }}>
                     <ImageIcon size={16} />
-                    {t("payment_screenshot")}
+                    { t("payment_screenshot")}
                   </p>
                   <a href={driver.paymentScreenshotUrl} target="_blank" rel="noopener noreferrer">
                     <img src={driver.paymentScreenshotUrl} style={{ width: "100%", borderRadius: "12px", border: "1px solid var(--border-color)", cursor: "zoom-in" }} alt="Payment Evidence" />
